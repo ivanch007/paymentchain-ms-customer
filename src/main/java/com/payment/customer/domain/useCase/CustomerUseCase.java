@@ -46,7 +46,7 @@ public class CustomerUseCase implements ICustomerServicePort {
     @Override
     public PagedResult<Customer> getAllCustomers(Integer page, Integer size, String sortingType) {
 
-        ValidateSortingType.validateSortBy(sortingType);
+        ValidateSortingType.validateSortingType(sortingType);
 
         List<Customer> customers = customerPersistencePort.getAllCustomers(page, size, sortingType);
         long totalElements = customerPersistencePort.countTotalCustomers();
@@ -68,14 +68,18 @@ public class CustomerUseCase implements ICustomerServicePort {
     @Override
     public void updateCustomer(Customer customer) {
         CustomerValidation.validateName(customer);
-        if (customerPersistencePort.emailAlreadyExist(customer.getEmail())) {
+
+        if (customerPersistencePort.isEmailUsedByAnotherCustomer(customer.getEmail(), customer.getId())) {
             throw new EmailAlReadyExist();
-        } else if (customerPersistencePort.phoneNumberAlreadyExist(customer.getPhoneNumber())) {
+        }
+
+        if (customerPersistencePort.isPhoneNumberUsedByAnotherCustomer(customer.getPhoneNumber(), customer.getId())) {
             throw new PhoneNumberAlreadyExist();
         }
-        customerPersistencePort.updateCustomer(customer);
 
+        customerPersistencePort.updateCustomer(customer);
     }
+
 
     @Override
     public void deleteCustomer(Long id) {

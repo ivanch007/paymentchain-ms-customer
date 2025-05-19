@@ -55,7 +55,7 @@ public class CustomerHandler implements ICustomerHandler{
     public void updateCustomer(Long id, CustomerRequest customerRequest) {
         Customer customer = customerRequestMapper.toCustomer(customerRequest);
         customer.setId(id);
-        customerServicePort.saveCustomer(customer);
+        customerServicePort.updateCustomer(customer);
 
     }
 

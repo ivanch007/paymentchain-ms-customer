@@ -19,6 +19,10 @@ public interface ICustomerPersistencePort {
 
     boolean phoneNumberAlreadyExist(Integer phoneNumber);
 
+    boolean isEmailUsedByAnotherCustomer(String email, Long id);
+
+    boolean isPhoneNumberUsedByAnotherCustomer(Integer phoneNumber, Long id);
+
 
     Long countTotalCustomers();
 }

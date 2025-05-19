@@ -60,18 +60,34 @@ public class CustomerJpaAdapter implements ICustomerPersistencePort {
 
     @Override
     public void updateCustomer(Customer customer) {
-        if (customerRepository.findById(customer.getId()).isPresent()) {
-            customerRepository.save(customerEntityMapper.toEntity(customer));
-        }
-        if(customerRepository.findByEmail(customer.getEmail()).isPresent()) {
-            throw new EmailAlReadyExist();
-        }
-        if (customerRepository.findByPhoneNumber(customer.getPhoneNumber()).isPresent()) {
-            throw new PhoneNumberAlreadyExist();
-        }
-        else {
-            throw new NoDataFound();
-        }
+
+        CustomerEntity existingCustomer = customerRepository.findById(customer.getId())
+                .orElseThrow(NoDataFound::new);
+
+        customerRepository.findByEmail(customer.getEmail()).ifPresent(found -> {
+            if (!found.getId().equals(customer.getId())) {
+                throw new EmailAlReadyExist();
+            }
+        });
+
+        customerRepository.findByPhoneNumber(customer.getPhoneNumber()).ifPresent(found -> {
+            if (!found.getId().equals(customer.getId())) {
+                throw new PhoneNumberAlreadyExist();
+            }
+        });
+
+        customerRepository.findByPhoneNumber(customer.getPhoneNumber()).ifPresent(found -> {
+            if (!found.getId().equals(customer.getId())) {
+                throw new PhoneNumberAlreadyExist();
+            }
+        });
+
+        existingCustomer.setName(customer.getName());
+        existingCustomer.setEmail(customer.getEmail());
+        existingCustomer.setPhoneNumber(customer.getPhoneNumber());
+
+        customerRepository.save(existingCustomer);
+
 
     }
 
@@ -95,6 +111,17 @@ public class CustomerJpaAdapter implements ICustomerPersistencePort {
     public boolean phoneNumberAlreadyExist(Integer phoneNumber) {
         return false;
     }
+
+    @Override
+    public boolean isEmailUsedByAnotherCustomer(String email, Long id) {
+        return customerRepository.existsByEmailAndIdNot(email, id);
+    }
+
+    @Override
+    public boolean isPhoneNumberUsedByAnotherCustomer(Integer phoneNumber, Long id) {
+        return customerRepository.existsByPhoneNumberAndIdNot(phoneNumber, id);
+    }
+
 
     @Override
     public Long countTotalCustomers() {
